@@ -9,16 +9,16 @@ namespace TutorLMS\Elementor\Addons;
 
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
-
+use TutorPro\CourseBundle\Models\BundleModel;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
 /**
- * Course Categories addons
+ * Bundle Categories addons
  * Handle all categories addon controls
  */
-class CourseCategories extends BaseAddon {
+class BundleCategories extends BaseAddon {
 
 	use \TutorLMS\Elementor\AddonsTrait;
 
@@ -40,7 +40,7 @@ class CourseCategories extends BaseAddon {
 	 * Categories label
 	 */
 	public function get_title() {
-		return __( 'Course Categories', 'tutor-lms-elementor-addons' );
+		return __( 'Bundle Categories', 'tutor-lms-elementor-addons' );
 	}
 
 	/**
@@ -169,7 +169,7 @@ class CourseCategories extends BaseAddon {
 					Group_Control_Typography::get_type(),
 					array(
 						'name'     => 'course_categories_label_typo',
-						'label'    => __( 'Label ypography', 'tutor-lms-elementor-addons' ),
+						'label'    => __( 'Label typography', 'tutor-lms-elementor-addons' ),
 						'selector' => $label_selector,
 					)
 				);
@@ -250,24 +250,28 @@ class CourseCategories extends BaseAddon {
 	 * Render addon, responsible for the editor and front end view
 	 */
 	protected function render() {
-		$course            = etlms_get_course();
+		global $post;
+		$bundle            = etlms_get_bundle();
 		$settings          = $this->get_settings_for_display();
-		$course_categories = array();
+		$bundle_categories = array();
 
-		if ( $course ) {
-			$course_categories = get_tutor_course_categories();
+		if ( $bundle ) {
+			$bundle_categories = BundleModel::get_bundle_course_categories( $post->ID );
+
 		}
 
-		if ( is_array( $course_categories ) && count( $course_categories ) ) :
+		if ( is_array( $bundle_categories ) && count( $bundle_categories ) ) :
 			$item = 1; ?>
 			<div class="etlms-course-categories tutor-meta">
-				<span class="tutor-meta-key"><?php esc_html_e( 'Categories', 'tutor-lms-elementor-addons' ); ?></span>
+				<span class="tutor-meta-key"><?php esc_html_e( 'Categories:', 'tutor-lms-elementor-addons' ); ?></span>
 				<span>
 					<?php
 						$category_links = array();
-					foreach ( $course_categories as $course_category ) :
-						$category_name    = $course_category->name;
-						$category_link    = get_term_link( $course_category->term_id );
+					foreach ( $bundle_categories as $bundle_category ) :
+						$category_name = $bundle_category->name;
+
+						$category_link = get_term_link( (int) $bundle_category->term_id );
+
 						$category_links[] = wp_sprintf( '<a href="%1$s">%2$s</a>', esc_url( $category_link ), esc_html( $category_name ) );
 						endforeach;
 						echo implode( ', ', $category_links );
